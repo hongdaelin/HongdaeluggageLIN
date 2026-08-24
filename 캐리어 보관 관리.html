@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<!-- saved from url=(0052)file:///C:/Users/Home/Downloads/carrier-storage.html -->
+<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>캐리어 보관 관리</title>
+<link rel="stylesheet" href="./캐리어 보관 관리_files/pretendard.css">
+<style>
+  :root{
+    --bg:#14171c;
+    --surface:#1c2129;
+    --surface-2:#242b35;
+    --surface-3:#2c3440;
+    --accent:#c9974a;
+    --accent-soft:#8a6a38;
+    --ok:#4fa98c;
+    --danger:#d1594c;
+    --text:#eef1f4;
+    --text-dim:#93a0ad;
+    --border:#2f3742;
+    --radius:14px;
+    font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:44px;}
+  header.app-header{max-width:960px;margin:0 auto;padding:20px 20px 0;}
+  h1.title{font-size:21px;font-weight:800;letter-spacing:-0.02em;margin:0 0 14px;display:flex;align-items:center;gap:8px;}
+  .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--ok);animation:pulse 2s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(79,169,140,.5);}70%{box-shadow:0 0 0 6px rgba(79,169,140,0);}100%{box-shadow:0 0 0 0 rgba(79,169,140,0);}}
+  nav.tabs{display:flex;gap:6px;background:var(--surface);padding:5px;border-radius:12px;max-width:960px;margin:0 auto;}
+  nav.tabs button{flex:1;padding:10px 0;border:none;border-radius:9px;background:transparent;color:var(--text-dim);font-weight:700;font-size:14px;font-family:inherit;cursor:pointer;}
+  nav.tabs button.active{background:var(--accent);color:#1b1204;}
+  main{max-width:960px;margin:0 auto;padding:18px 20px 0;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .section-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px;}
+  .section-block h2{font-size:15px;margin:0 0 12px;font-weight:800;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+  .form-grid .full{grid-column:1/-1;}
+  label{font-size:12px;color:var(--text-dim);display:block;margin-bottom:5px;font-weight:700;}
+  input[type=text],input[type=tel],input[type=number],input[type=date]{
+    width:100%;background:var(--surface-2);border:1px solid var(--border);color:var(--text);
+    padding:10px 11px;border-radius:8px;font-family:inherit;font-size:14px;
+  }
+  .duration-toggle{display:flex;gap:8px;}
+  .duration-toggle button{
+    flex:1;padding:10px 0;border-radius:8px;border:1px solid var(--border);
+    background:var(--surface-2);color:var(--text-dim);font-family:inherit;font-weight:700;
+    font-size:13.5px;cursor:pointer;
+  }
+  .duration-toggle button.sel{background:var(--accent);border-color:var(--accent);color:#1b1204;}
+  .price-preview{
+    display:flex;justify-content:space-between;align-items:center;
+    background:var(--surface-2);border:1px dashed var(--accent-soft);border-radius:10px;
+    padding:12px 14px;margin:12px 0;font-size:15px;
+  }
+  .price-preview .val{font-size:20px;font-weight:800;color:var(--accent);}
+  button.primary{
+    width:100%;background:var(--accent);color:#1b1204;border:none;padding:12px 0;
+    border-radius:10px;font-family:inherit;font-weight:800;font-size:15px;cursor:pointer;
+  }
+  button.primary:hover{filter:brightness(1.08);}
+  .hint{font-size:12px;color:var(--text-dim);margin-top:6px;}
+
+  /* 티켓 카드 (수하물표 스타일) */
+  .ticket-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+  .ticket{
+    position:relative;
+    background:linear-gradient(160deg,var(--surface-3),var(--surface-2));
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:16px 16px 16px 22px;
+    overflow:hidden;
+  }
+  .ticket::before{
+    content:'';position:absolute;left:0;top:0;bottom:0;width:6px;
+    background:repeating-linear-gradient(180deg,var(--accent) 0 8px, transparent 8px 16px);
+  }
+  .ticket::after{
+    content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);
+    width:16px;height:16px;border-radius:50%;background:var(--bg);border:1px solid var(--border);
+  }
+  .t-seq{font-size:12px;color:var(--accent);font-weight:800;letter-spacing:.04em;}
+  .t-name{font-size:17px;font-weight:800;margin:2px 0 2px;}
+  .t-phone{font-size:12.5px;color:var(--text-dim);margin-bottom:10px;}
+  .t-items{font-size:13.5px;margin-bottom:8px;color:var(--text);}
+  .t-items b{color:var(--accent);}
+  .t-price{font-size:15px;font-weight:800;color:var(--accent);margin-bottom:10px;}
+  .t-elapsed{
+    display:inline-block;font-size:12.5px;background:var(--surface);border:1px solid var(--border);
+    padding:5px 10px;border-radius:20px;color:var(--text-dim);margin-bottom:12px;
+  }
+  .t-elapsed.warn{color:var(--danger);border-color:var(--danger);}
+  .done-btn{
+    width:100%;padding:10px 0;border-radius:9px;border:none;
+    background:var(--ok);color:#0e2019;font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;
+  }
+  .empty-hint{color:var(--text-dim);text-align:center;padding:40px 0;font-size:14px;}
+
+  /* 완료 내역 */
+  .sales-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+  .stat-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .stat-card .label{font-size:12.5px;color:var(--text-dim);margin-bottom:6px;}
+  .stat-card .value{font-size:22px;font-weight:800;color:var(--accent);}
+  .hist-row{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    margin-bottom:8px;font-size:13.5px;
+  }
+  .hist-row .meta{color:var(--text-dim);font-size:12px;margin-top:3px;}
+  .danger-btn{background:transparent;border:1px solid var(--danger);color:var(--danger);padding:8px 14px;border-radius:8px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;}
+
+  /* 설정 */
+  .tier-table{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:13.5px;}
+  .tier-table th,.tier-table td{padding:8px 6px;border-bottom:1px solid var(--border);text-align:center;}
+  .tier-table th{color:var(--text-dim);font-weight:700;font-size:12px;}
+  .tier-table input{width:90px;text-align:center;padding:6px;}
+  .tier-table button{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;}
+  .tier-table button:hover{color:var(--danger);}
+  .add-tier-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+  .add-tier-row input{flex:1;min-width:80px;}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <h1 class="title">🧳 캐리어 보관 관리 <span class="sync-dot" title="실시간 동기화"></span></h1>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="checkin">접수 / 보관중</button>
+  <button class="tab-btn" data-tab="history">완료 내역</button>
+  <button class="tab-btn" data-tab="settings">설정</button>
+</nav>
+
+<main>
+  <!-- 접수 / 보관중 -->
+  <section class="panel active" id="panel-checkin">
+    <div class="section-block">
+      <h2>새 접수</h2>
+      <div class="form-grid">
+        <div>
+          <label>이름</label>
+          <input type="text" id="inName" placeholder="홍길동">
+        </div>
+        <div>
+          <label>연락처</label>
+          <input type="tel" id="inPhone" placeholder="010-0000-0000">
+        </div>
+        <div>
+          <label>캐리어 개수</label>
+          <input type="number" id="inCarrier" min="0" value="0">
+        </div>
+        <div>
+          <label>그 외 짐 개수</label>
+          <input type="number" id="inOther" min="0" value="0">
+        </div>
+        <div class="full">
+          <label>보관 시간 (캐리어 요금 기준)</label>
+          <div class="duration-toggle">
+            <button type="button" class="" data-dur="5h">5시간</button>
+            <button type="button" data-dur="1d" class="sel">1일</button>
+          </div>
+          <div class="hint">그 외 짐은 1일 기준 요금이 적용됩니다.</div>
+        </div>
+      </div>
+      <div class="price-preview">
+        <span>예상 요금</span>
+        <span class="val" id="pricePreview">0원</span>
+      </div>
+      <button class="primary" id="checkinBtn">접수하고 번호표 발급</button>
+    </div>
+
+    <h2 style="font-size:16px;margin:20px 0 12px;font-weight:800;">보관 중</h2>
+    <div class="ticket-grid" id="ticketGrid"></div>
+    <div class="empty-hint" id="ticketEmpty" style="display: block;">현재 보관 중인 짐이 없습니다.</div>
+  </section>
+
+  <!-- 완료 내역 -->
+  <section class="panel" id="panel-history">
+    <div class="sales-top">
+      <input type="date" id="histDate">
+      <button class="danger-btn" id="clearHistDay">선택 날짜 기록 삭제</button>
+    </div>
+    <div class="stat-cards">
+      <div class="stat-card"><div class="label">선택 날짜 매출</div><div class="value" id="dayTotal">10,000원</div></div>
+      <div class="stat-card"><div class="label">전체 누적 매출</div><div class="value" id="allTotal">10,000원</div></div>
+    </div>
+    <div id="histList"><div class="hist-row"><div>
+          <div>No.001 김민찬 · C 1-2번 · E 1번</div>
+          <div class="meta">오후 07:04 → 오후 07:04 · 총 0분 · 캐리어 2개 · 기타 1개</div>
+        </div>
+        <div style="font-weight:700;color:var(--accent);">10,000원</div></div></div>
+  </section>
+
+  <!-- 설정 -->
+  <section class="panel" id="panel-settings">
+    <div class="section-block">
+      <h2>캐리어 요금표</h2>
+      <table class="tier-table" id="carrierTierTable">
+        <thead><tr><th>개수</th><th>5시간</th><th>1일</th><th></th></tr></thead>
+        <tbody id="carrierTierBody"><tr><td>1개</td>
+      <td><input type="number" min="0" value="4000" data-count="1" data-dur="5h"></td>
+      <td><input type="number" min="0" value="10000" data-count="1" data-dur="1d"></td>
+      <td><button data-count="1">✕</button></td></tr><tr><td>2개</td>
+      <td><input type="number" min="0" value="7000" data-count="2" data-dur="5h"></td>
+      <td><input type="number" min="0" value="17000" data-count="2" data-dur="1d"></td>
+      <td><button data-count="2">✕</button></td></tr><tr><td>3개</td>
+      <td><input type="number" min="0" value="9000" data-count="3" data-dur="5h"></td>
+      <td><input type="number" min="0" value="22000" data-count="3" data-dur="1d"></td>
+      <td><button data-count="3">✕</button></td></tr></tbody>
+      </table>
+      <div class="add-tier-row">
+        <input type="number" id="newTierCount" placeholder="개수" min="1">
+        <input type="number" id="newTier5h" placeholder="5시간 요금" min="0">
+        <input type="number" id="newTier1d" placeholder="1일 요금" min="0">
+        <button class="primary" style="width:auto;padding:9px 16px;" id="addTierBtn">추가</button>
+      </div>
+      <div class="hint">설정된 개수를 초과하면 가장 높은 구간의 1개당 평균 단가로 자동 계산됩니다. 정확한 가격을 쓰려면 해당 개수 구간을 직접 추가하세요.</div>
+    </div>
+    <div class="section-block">
+      <h2>그 외 짐 요금</h2>
+      <div class="form-grid">
+        <div class="full">
+          <label>1개당 요금 (1일 기준)</label>
+          <input type="number" id="otherPriceInput" min="0">
+        </div>
+      </div>
+      <button class="primary" id="saveOtherPriceBtn">저장</button>
+    </div>
+    <div class="section-block">
+      <h2>접수 번호</h2>
+      <div class="hint" style="margin-bottom:10px;">다음 발급 번호: <b id="nextSeqLabel" style="color:var(--accent);">3</b></div>
+      <button class="danger-btn" id="resetSeqBtn">접수 번호 초기화 (1번부터 다시)</button>
+    </div>
+    <div class="section-block">
+      <h2>짐 번호표 (캐리어에 매다는 번호)</h2>
+      <div class="hint" style="margin-bottom:10px;">
+        다음 캐리어 번호표: <b id="nextCarrierTagLabel" style="color:var(--accent);">C6</b> ·
+        다음 기타짐 번호표: <b id="nextItemTagLabel" style="color:var(--accent);">E4</b>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="danger-btn" style="flex:1;" id="resetCarrierTagBtn">캐리어 번호표 초기화</button>
+        <button class="danger-btn" style="flex:1;" id="resetItemTagBtn">기타짐 번호표 초기화</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+const KEY_CONFIG='carrier:config';
+const KEY_TICKETS='carrier:tickets';
+
+const DEFAULT_CONFIG={
+  carrierPricing:{ '5h':{1:4000,2:7000,3:9000}, '1d':{1:10000,2:17000,3:22000} },
+  otherItemPrice:3000,
+  nextSeq:1,
+  nextCarrierTag:1,
+  nextItemTag:1
+};
+let config=JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+let tickets=[]; // {id, seq, name, phone, carrierCount, otherCount, carrierTags, otherTags, duration, price, checkedInAt, status, completedAt, elapsedMinutes}
+let selectedDuration='5h';
+
+function tagRangeLabel(prefix, tags){
+  if(!tags || !tags.length) return null;
+  if(tags.length===1) return prefix+' '+tags[0]+'번';
+  return prefix+' '+tags[0]+'-'+tags[tags.length-1]+'번';
+}
+
+const hasCloudStorage = typeof window.storage !== 'undefined';
+function lsGet(key){
+  try{
+    const raw=localStorage.getItem(key);
+    return raw!==null ? {key, value:raw} : null;
+  }catch(e){ return null; }
+}
+function lsSet(key, value){
+  try{ localStorage.setItem(key, value); }catch(e){ console.error('storage 저장 실패', e); }
+}
+async function safeGet(key){
+  if(hasCloudStorage){
+    try{ const r=await window.storage.get(key,true); if(r) return r; }catch(e){ /* fall through */ }
+  }
+  return lsGet(key);
+}
+async function loadAll(){
+  const c=await safeGet(KEY_CONFIG);
+  if(c) config=Object.assign({}, DEFAULT_CONFIG, JSON.parse(c.value));
+  const t=await safeGet(KEY_TICKETS);
+  tickets=t?JSON.parse(t.value):[];
+}
+async function saveConfig(){
+  const json=JSON.stringify(config);
+  lsSet(KEY_CONFIG, json);
+  if(hasCloudStorage){ try{ await window.storage.set(KEY_CONFIG, json, true); }catch(e){ console.error('클라우드 저장 실패', e); } }
+}
+async function saveTickets(){
+  const json=JSON.stringify(tickets);
+  lsSet(KEY_TICKETS, json);
+  if(hasCloudStorage){ try{ await window.storage.set(KEY_TICKETS, json, true); }catch(e){ console.error('클라우드 저장 실패', e); } }
+}
+
+function won(n){ return Math.round(n).toLocaleString('ko-KR')+'원'; }
+function escapeHtml(str){ const d=document.createElement('div'); d.textContent=str; return d.innerHTML; }
+
+// ---------- 탭 ----------
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='history') renderHistory();
+    if(btn.dataset.tab==='settings') renderSettings();
+  });
+});
+
+// ---------- 접수 폼 ----------
+document.querySelectorAll('.duration-toggle button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.duration-toggle button').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel');
+    selectedDuration=b.dataset.dur;
+    updatePricePreview();
+  });
+});
+['inCarrier','inOther'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', updatePricePreview);
+});
+
+function calcPrice(carrierCount, otherCount, duration){
+  let price=0;
+  if(carrierCount>0){
+    const tierTable=config.carrierPricing[duration]||{};
+    if(tierTable[carrierCount]!=null){
+      price+=tierTable[carrierCount];
+    }else{
+      const keys=Object.keys(tierTable).map(Number).sort((a,b)=>a-b);
+      if(keys.length){
+        const maxKey=keys[keys.length-1];
+        const perUnit=tierTable[maxKey]/maxKey;
+        price+=Math.round(perUnit*carrierCount);
+      }
+    }
+  }
+  if(otherCount>0) price += otherCount * (config.otherItemPrice||0);
+  return price;
+}
+
+function updatePricePreview(){
+  const carrierCount=parseInt(document.getElementById('inCarrier').value,10)||0;
+  const otherCount=parseInt(document.getElementById('inOther').value,10)||0;
+  document.getElementById('pricePreview').textContent = won(calcPrice(carrierCount, otherCount, selectedDuration));
+}
+
+document.getElementById('checkinBtn').addEventListener('click', async ()=>{
+  const name=document.getElementById('inName').value.trim();
+  const phone=document.getElementById('inPhone').value.trim();
+  const carrierCount=parseInt(document.getElementById('inCarrier').value,10)||0;
+  const otherCount=parseInt(document.getElementById('inOther').value,10)||0;
+  if(!name || !phone){ alert('이름과 연락처를 입력해주세요.'); return; }
+  if(carrierCount<=0 && otherCount<=0){ alert('캐리어 또는 그 외 짐 개수를 1개 이상 입력해주세요.'); return; }
+  const price=calcPrice(carrierCount, otherCount, selectedDuration);
+  const seq=config.nextSeq;
+
+  const carrierTags=[];
+  for(let i=0;i<carrierCount;i++){ carrierTags.push(config.nextCarrierTag); config.nextCarrierTag++; }
+  const otherTags=[];
+  for(let i=0;i<otherCount;i++){ otherTags.push(config.nextItemTag); config.nextItemTag++; }
+
+  const ticket={
+    id:'tk_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+    seq, name, phone, carrierCount, otherCount, carrierTags, otherTags,
+    duration:selectedDuration, price,
+    checkedInAt:new Date().toISOString(),
+    status:'active'
+  };
+  tickets.push(ticket);
+  config.nextSeq++;
+  await saveTickets();
+  await saveConfig();
+  document.getElementById('inName').value='';
+  document.getElementById('inPhone').value='';
+  document.getElementById('inCarrier').value='0';
+  document.getElementById('inOther').value='0';
+  updatePricePreview();
+  renderActive();
+  const tagMsgParts=[];
+  const cLabel=tagRangeLabel('C', carrierTags);
+  const eLabel=tagRangeLabel('E', otherTags);
+  if(cLabel) tagMsgParts.push(cLabel);
+  if(eLabel) tagMsgParts.push(eLabel);
+  alert(seq+'번 접수 완료 — '+won(price)+'\n번호표: '+tagMsgParts.join(' / '));
+});
+
+// ---------- 보관 중 목록 ----------
+function elapsedMinutes(iso){ return Math.floor((Date.now()-new Date(iso).getTime())/60000); }
+function elapsedSeconds(iso){ return Math.floor((Date.now()-new Date(iso).getTime())/1000); }
+function formatElapsed(totalSec){
+  const h=Math.floor(totalSec/3600);
+  const m=Math.floor((totalSec%3600)/60);
+  const s=totalSec%60;
+  const pad=n=>String(n).padStart(2,'0');
+  if(h>0) return h+'시간 '+pad(m)+'분 '+pad(s)+'초째 보관 중';
+  return m+'분 '+pad(s)+'초째 보관 중';
+}
+
+function renderActive(){
+  const grid=document.getElementById('ticketGrid');
+  grid.innerHTML='';
+  const active=tickets.filter(t=>t.status==='active').sort((a,b)=>a.seq-b.seq);
+  document.getElementById('ticketEmpty').style.display= active.length? 'none':'block';
+  active.forEach(t=>{
+    const secs=elapsedSeconds(t.checkedInAt);
+    const limitMins = t.duration==='5h'? 300 : 1440;
+    const warn = Math.floor(secs/60)>=limitMins;
+    const cLabel=tagRangeLabel('C', t.carrierTags);
+    const eLabel=tagRangeLabel('E', t.otherTags);
+    const tagLine=[cLabel,eLabel].filter(Boolean).join(' · ');
+    const card=document.createElement('div');
+    card.className='ticket';
+    card.innerHTML=`
+      <div class="t-seq">No. ${String(t.seq).padStart(3,'0')}</div>
+      <div class="t-name">${escapeHtml(t.name)}</div>
+      <div class="t-phone">${escapeHtml(t.phone)}</div>
+      <div class="t-items">캐리어 <b>${t.carrierCount}개</b> · 기타 짐 <b>${t.otherCount}개</b> · <span style="color:var(--text-dim);">${t.duration==='5h'?'5시간권':'1일권'}</span></div>
+      ${tagLine? `<div class="t-items" style="color:var(--accent);font-weight:700;">번호표 ${tagLine}</div>` : ''}
+      <div class="t-price">${won(t.price)}</div>
+      <div class="t-elapsed${warn?' warn':''}">${formatElapsed(secs)}</div>
+      <button class="done-btn">완료 (수령)</button>
+    `;
+    card.querySelector('.done-btn').addEventListener('click', async ()=>{
+      if(!confirm(t.name+'님 ('+t.seq+'번) 수령 처리하고 완료할까요?')) return;
+      t.status='done';
+      t.completedAt=new Date().toISOString();
+      t.elapsedMinutes=elapsedMinutes(t.checkedInAt);
+      await saveTickets();
+      renderActive();
+    });
+    grid.appendChild(card);
+  });
+}
+
+// ---------- 완료 내역 ----------
+const histDateInput=document.getElementById('histDate');
+histDateInput.value=new Date().toISOString().slice(0,10);
+histDateInput.addEventListener('change',renderHistory);
+
+function renderHistory(){
+  const date=histDateInput.value;
+  const done=tickets.filter(t=>t.status==='done');
+  const dayList=done.filter(t=>t.completedAt.slice(0,10)===date).sort((a,b)=>b.completedAt.localeCompare(a.completedAt));
+  const dayTotal=dayList.reduce((s,t)=>s+t.price,0);
+  const allTotal=done.reduce((s,t)=>s+t.price,0);
+  document.getElementById('dayTotal').textContent=won(dayTotal);
+  document.getElementById('allTotal').textContent=won(allTotal);
+  const listWrap=document.getElementById('histList');
+  listWrap.innerHTML='';
+  if(!dayList.length){
+    listWrap.innerHTML='<div class="empty-hint">선택한 날짜의 완료 기록이 없습니다.</div>';
+  }else{
+    dayList.forEach(t=>{
+      const row=document.createElement('div');
+      row.className='hist-row';
+      const inTime=new Date(t.checkedInAt).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+      const outTime=new Date(t.completedAt).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+      const h=Math.floor(t.elapsedMinutes/60), m=t.elapsedMinutes%60;
+      const cLabel=tagRangeLabel('C', t.carrierTags);
+      const eLabel=tagRangeLabel('E', t.otherTags);
+      const tagLine=[cLabel,eLabel].filter(Boolean).join(' · ');
+      row.innerHTML=`<div>
+          <div>No.${String(t.seq).padStart(3,'0')} ${escapeHtml(t.name)}${tagLine? ' · '+tagLine:''}</div>
+          <div class="meta">${inTime} → ${outTime} · 총 ${h>0? h+'시간 ':''}${m}분 · 캐리어 ${t.carrierCount}개 · 기타 ${t.otherCount}개</div>
+        </div>
+        <div style="font-weight:700;color:var(--accent);">${won(t.price)}</div>`;
+      listWrap.appendChild(row);
+    });
+  }
+}
+
+document.getElementById('clearHistDay').addEventListener('click', async ()=>{
+  const date=histDateInput.value;
+  if(!confirm(date+' 완료 기록을 모두 삭제할까요?')) return;
+  tickets=tickets.filter(t=>!(t.status==='done' && t.completedAt.slice(0,10)===date));
+  await saveTickets();
+  renderHistory();
+});
+
+// ---------- 설정 ----------
+function renderSettings(){
+  document.getElementById('nextSeqLabel').textContent=config.nextSeq;
+  document.getElementById('nextCarrierTagLabel').textContent='C'+config.nextCarrierTag;
+  document.getElementById('nextItemTagLabel').textContent='E'+config.nextItemTag;
+  document.getElementById('otherPriceInput').value=config.otherItemPrice;
+
+  const body=document.getElementById('carrierTierBody');
+  body.innerHTML='';
+  const counts=new Set([
+    ...Object.keys(config.carrierPricing['5h']||{}).map(Number),
+    ...Object.keys(config.carrierPricing['1d']||{}).map(Number)
+  ]);
+  [...counts].sort((a,b)=>a-b).forEach(count=>{
+    const p5=config.carrierPricing['5h']?.[count] ?? '';
+    const p1=config.carrierPricing['1d']?.[count] ?? '';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${count}개</td>
+      <td><input type="number" min="0" value="${p5}" data-count="${count}" data-dur="5h"></td>
+      <td><input type="number" min="0" value="${p1}" data-count="${count}" data-dur="1d"></td>
+      <td><button data-count="${count}">✕</button></td>`;
+    tr.querySelectorAll('input').forEach(inp=>{
+      inp.addEventListener('change', async ()=>{
+        const c=parseInt(inp.dataset.count,10);
+        const dur=inp.dataset.dur;
+        const val=parseInt(inp.value,10);
+        if(!config.carrierPricing[dur]) config.carrierPricing[dur]={};
+        if(isNaN(val)) delete config.carrierPricing[dur][c];
+        else config.carrierPricing[dur][c]=val;
+        await saveConfig();
+      });
+    });
+    tr.querySelector('button').addEventListener('click', async ()=>{
+      const c=parseInt(tr.querySelector('button').dataset.count,10);
+      if(!confirm(c+'개 구간을 삭제할까요?')) return;
+      delete config.carrierPricing['5h']?.[c];
+      delete config.carrierPricing['1d']?.[c];
+      await saveConfig();
+      renderSettings();
+    });
+    body.appendChild(tr);
+  });
+}
+
+document.getElementById('addTierBtn').addEventListener('click', async ()=>{
+  const count=parseInt(document.getElementById('newTierCount').value,10);
+  const p5=parseInt(document.getElementById('newTier5h').value,10);
+  const p1=parseInt(document.getElementById('newTier1d').value,10);
+  if(!count || count<1){ alert('개수를 입력해주세요.'); return; }
+  if(!isNaN(p5)){ if(!config.carrierPricing['5h']) config.carrierPricing['5h']={}; config.carrierPricing['5h'][count]=p5; }
+  if(!isNaN(p1)){ if(!config.carrierPricing['1d']) config.carrierPricing['1d']={}; config.carrierPricing['1d'][count]=p1; }
+  await saveConfig();
+  document.getElementById('newTierCount').value='';
+  document.getElementById('newTier5h').value='';
+  document.getElementById('newTier1d').value='';
+  renderSettings();
+});
+
+document.getElementById('saveOtherPriceBtn').addEventListener('click', async ()=>{
+  const val=parseInt(document.getElementById('otherPriceInput').value,10);
+  if(isNaN(val)||val<0){ alert('올바른 금액을 입력해주세요.'); return; }
+  config.otherItemPrice=val;
+  await saveConfig();
+  alert('저장되었습니다.');
+});
+
+document.getElementById('resetSeqBtn').addEventListener('click', async ()=>{
+  if(!confirm('접수 번호를 1번부터 다시 시작할까요? (보관 중인 짐의 번호는 유지됩니다)')) return;
+  config.nextSeq=1;
+  await saveConfig();
+  renderSettings();
+});
+
+document.getElementById('resetCarrierTagBtn').addEventListener('click', async ()=>{
+  if(!confirm('캐리어 번호표를 C1부터 다시 시작할까요? 기존 보관 중인 짐의 번호표와 겹칠 수 있으니 보관 중인 짐이 없을 때 사용하세요.')) return;
+  config.nextCarrierTag=1;
+  await saveConfig();
+  renderSettings();
+});
+
+document.getElementById('resetItemTagBtn').addEventListener('click', async ()=>{
+  if(!confirm('기타짐 번호표를 E1부터 다시 시작할까요? 기존 보관 중인 짐의 번호표와 겹칠 수 있으니 보관 중인 짐이 없을 때 사용하세요.')) return;
+  config.nextItemTag=1;
+  await saveConfig();
+  renderSettings();
+});
+
+// ---------- 동기화 & 타이머 ----------
+async function refresh(){
+  await loadAll();
+  renderActive();
+  if(document.getElementById('panel-history').classList.contains('active')) renderHistory();
+  if(document.getElementById('panel-settings').classList.contains('active')) renderSettings();
+}
+refresh();
+setInterval(refresh, 3000);
+setInterval(renderActive, 1000); // 경과 시간 초 단위 갱신
+updatePricePreview();
+</script>
+
+
+</body></html>
